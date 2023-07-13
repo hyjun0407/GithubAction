@@ -5,9 +5,6 @@ on: workflow_dispatch
 jobs:
   python:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./build
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
@@ -21,12 +18,11 @@ jobs:
 
       - name: Run script and save sys.version as artifact
         run: |
-          python -c "import sys; print(sys.version)" > sys_version${{ matrix.python-version }}.txt
+          python -c "import sys; print(sys.version)" > ./sys_version${{ matrix.python-version }}.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: pytest-results-${{ matrix.python-version }}
-          path: ./sys_version${{ matrix.python-version }}.txt
-        # Use always() to always run this step to publish test results when there are test failures
+          path: ./build/sys_version${{ matrix.python-version }}.txt
         if: ${{ always() }}

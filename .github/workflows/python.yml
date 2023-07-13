@@ -22,12 +22,11 @@ jobs:
       - name: Run script and save sys.version as artifact
         run: |
           python -c "import sys; print(sys.version)" > sys_version${{ matrix.python-version }}.txt
-          echo "::set-output name=sys_version::sys_version${{ matrix.python-version }}.txt"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: pytest-results-${{ matrix.python-version }}
-          path: ./${{ matrix.python-version }}.xml
+          path: ./sys_version${{ matrix.python-version }}.txt
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}

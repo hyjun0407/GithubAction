@@ -3,11 +3,14 @@ name: Python
 on: workflow_dispatch
 
 jobs:
-  python38:
+  python:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./build
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -15,45 +18,16 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
-      - uses: actions/upload-artifact@v3
-        with:
-          name: python3.8
-          path: /python38.txt
-  python39:
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          python-version: ["3.9"]
 
-      steps:
-        - uses: actions/checkout@v3
-        - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v4
-          with:
-            python-version: ${{ matrix.python-version }}
-        - name: Display Python version
-          run: python -c "import sys; print(sys.version)"
-        - uses: actions/upload-artifact@v3
-          with:
-            name: python3.9
-            path: /python39.txt
-  python310:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
+      - name: Run script and save sys.version as artifact
+        run: |
+          python -c "import sys; print(sys.version)" > sys_version${{ matrix.python-version }}.txt
+          echo "::set-output name=sys_version::sys_version${{ matrix.python-version }}.txt"
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
-      - uses: actions/upload-artifact@v3
-        with:
-          name: python3.8
-          path: /python310.txt
+          name: pytest-results-${{ matrix.python-version }}
+          path: ./sys_version${{ matrix.python-version }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
